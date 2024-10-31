@@ -72,13 +72,15 @@ To run the evaluation, mount the current directory and specify input and output 
 
 #### Ubuntu
 ```bash
-docker run -v "$(pwd):/usr/src/app" competition_env python evaluation_script.py input.txt output.txt
+docker run -v "$(pwd):/app" --network none competition_env evaluation_script.py input.txt output.txt
 ```
 
 #### Windows (PowerShell)
 ```powershell
-docker run -v "${PWD}:/usr/src/app" competition_env python evaluation_script.py input.txt output.txt
+docker run -v "${PWD}:/app" --network none competition_env evaluation_script.py input.txt output.txt
 ```
+
+By using --network none, the container will be completely isolated from the network, ensuring it cannot connect to the internet or any external network.
 
 ### Input and Output
 - **Input File**: `input.txt` (must be placed in the current directory).
