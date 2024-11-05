@@ -46,8 +46,8 @@ This guide will walk you through setting up and running the competition environm
 ## Repository Setup
 1. **Clone the Repository**:
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone git@github.com:asztyber/DXCdockerDummyExample.git
+   cd DXCdockerDummyExample
    ```
 
 2. **Files Overview**:
