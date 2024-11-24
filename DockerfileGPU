@@ -1,0 +1,40 @@
+# Start from NVIDIA's CUDA base image
+FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
+
+# Set environment variables
+ENV PYTHON_VERSION=3.11
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python${PYTHON_VERSION} \
+    python${PYTHON_VERSION}-dev \
+    python3-pip \
+    python3-wheel \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symbolic links for python
+RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/local/bin/python \
+    && ln -s /usr/bin/python${PYTHON_VERSION} /usr/local/bin/python3
+
+# Install TensorFlow dependencies
+RUN python -m pip install --no-cache-dir --upgrade pip setuptools
+
+# Install cudnn libs
+RUN pip install --no-cache-dir nvidia-cudnn-cu12==8.9.*
+
+
+# Set working directory
+WORKDIR /app
+
+COPY . .
+
+# Install any Python dependencies (each participant can provide their own requirements.txt)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set the entry point to Python
+ENTRYPOINT ["python"]

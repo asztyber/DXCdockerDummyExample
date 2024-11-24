@@ -25,11 +25,50 @@ This guide will walk you through setting up and running the competition environm
    sudo systemctl enable docker
    ```
 
+   3a. ***systemct1 on WSL2***
+
+   Only if the above doesn't work and you are using WSL2.
+
+    If you want to use systemd in WSL2, you'll need to enable it explicitly.
+
+    - Edit the /etc/wsl.conf file (create it if it doesn't exist) and add the following:
+    ```
+    [boot]
+   systemd=true
+   ```
+   - Shut down and restart WSL:
+   ```bash
+   wsl --shutdown
+   ```
+
 4. **Add your user to the Docker group** (optional, for running Docker without `sudo`):
    ```bash
    sudo usermod -aG docker $USER
    ```
    After this, log out and log back in for changes to take effect.
+
+5. **Install NVIDIA Container Toolkit (Optional for GPU Use)**
+
+If you're using Docker for TensorFlow, you need to install the NVIDIA Container Toolkit. Follow these steps:
+
+ - **Add the NVIDIA Docker Package Repository:**
+   ```bash
+   distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+   sudo apt update
+
+- **Install NVIDIA Docker Toolkit:**
+   ```bash
+   sudo apt install -y nvidia-docker2
+   sudo systemctl restart docker
+   ```
+- **Verify GPU Support in Docker:** Run the following command to check if Docker can access the GPU:
+   ```bash
+   docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu20.04 nvidia-smi
+   ```
+
+
 
 #### Windows
 1. **Download Docker Desktop** from [Docker's official website](https://www.docker.com/products/docker-desktop).
@@ -66,6 +105,11 @@ In the directory where the Dockerfile is located, build the Docker image:
 docker build -t competition_env .
 ```
 
+For version with GPU support:
+```bash
+docker build -f DockerfileGPU -t competition_env .
+```
+
 ### Running the Evaluation
 
 To run the evaluation, mount the current directory and specify input and output files.
@@ -73,6 +117,11 @@ To run the evaluation, mount the current directory and specify input and output 
 #### Ubuntu
 ```bash
 docker run -v "$(pwd):/app" --network none competition_env evaluation_script.py input.txt output.txt
+```
+
+For version with GPU support:
+```bash
+docker run --gpus all -v "$(pwd):/app" --network none competition_env evaluation_script.py input.txt output.txt
 ```
 
 #### Windows (PowerShell)
@@ -107,3 +156,10 @@ class ParticipantProcessor(BaseProcessor):
 ```
 
 
+## Cleaning
+Docker objects can take quite a lot of disc space.
+
+To remove unused docker objects (images, containers, volumes, networks):
+```
+docker system prune -a --volumes
+```
